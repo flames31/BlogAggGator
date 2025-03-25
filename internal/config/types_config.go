@@ -46,7 +46,7 @@ func getConfigFilePath() (string, error) {
 
 func (c *Config) SetUser(newUserName string) error {
 	c.CurrentUserName = newUserName
-
+	fmt.Printf("%v is currently logged in!\n", newUserName)
 	return write(c)
 }
 
