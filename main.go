@@ -1,15 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
 	"log"
 	"os"
 
 	"github.com/flames31/BlogAggGator/internal/config"
+	"github.com/flames31/BlogAggGator/internal/database"
+
+	_ "github.com/lib/pq"
 )
 
 type state struct {
 	cfg *config.Config
+	db  *database.Queries
 }
 
 func main() {
@@ -17,8 +21,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Summ went wrong gang: %v", err)
 	}
+	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		log.Fatal("Error opening DB")
+		return
+	}
+	dbQueries := database.New(db)
 	programState := &state{
 		cfg: &cfg,
+		db:  dbQueries,
 	}
 
 	cmds := commands{
@@ -26,13 +37,13 @@ func main() {
 	}
 
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage : cli <command> [args...]")
 		return
 	}
 
-	fmt.Println(os.Args)
 	cmdName := os.Args[1]
 	cmdArgs := os.Args[2:]
 
