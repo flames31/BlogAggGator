@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -80,5 +81,24 @@ func handlerAgg(s *state, cmd command) error {
 	}
 	fmt.Println(*rssFeed)
 
+	return nil
+}
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.Args) != 2 {
+		return errors.New("we need two args. usage: addfeed <feed_name> <feed_url>")
+	}
+
+	feedName := cmd.Args[0]
+	feedUrl := cmd.Args[1]
+
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{ID: uuid.New(), CreatedAt: time.Now(), UpdatedAt: time.Now(), Name: feedName, Url: feedUrl, Name_2: s.cfg.CurrentUserName})
+	if err != nil {
+		return nil
+	}
+
+	fmt.Println("Feed created succesfully!")
+
+	fmt.Println(feed)
 	return nil
 }
