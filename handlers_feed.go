@@ -21,7 +21,7 @@ func handlerAgg(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 2 {
 		return errors.New("we need two args. usage: addfeed <feed_name> <feed_url>")
 	}
@@ -34,14 +34,14 @@ func handlerAddFeed(s *state, cmd command) error {
 		return nil
 	}
 	fmt.Println("Feed created succesfully!")
-	err = followFeed(s, feed.Url)
+	err = followFeed(s, feed, user)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func handlerGetFeeds(s *state, cmd command) error {
+func handlerGetFeeds(s *state, cmd command, user database.User) error {
 	feeds, err := s.db.GetAllFeeds(context.Background())
 	if err != nil {
 		return err
