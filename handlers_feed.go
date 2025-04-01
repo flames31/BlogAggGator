@@ -7,18 +7,21 @@ import (
 	"time"
 
 	"github.com/flames31/BlogAggGator/internal/database"
-	"github.com/flames31/BlogAggGator/internal/feed"
 	"github.com/google/uuid"
 )
 
 func handlerAgg(s *state, cmd command) error {
-	rssFeed, err := feed.GetFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if len(cmd.Args) != 1 {
+		return errors.New("we need one arg. usage: agg <time_between_reqs>")
+	}
+	timeBetweenRequests, err := time.ParseDuration(cmd.Args[0])
 	if err != nil {
 		return err
 	}
-	fmt.Println(*rssFeed)
-
-	return nil
+	ticker := time.NewTicker(timeBetweenRequests)
+	for ; ; <-ticker.C {
+		scrapeFeeds(s)
+	}
 }
 
 func handlerAddFeed(s *state, cmd command, user database.User) error {
