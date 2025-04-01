@@ -44,6 +44,10 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 	if err != nil {
 		return err
 	}
+	if len(feedFollows) == 0 {
+		fmt.Println("User is not following any feeds")
+		return nil
+	}
 	fmt.Printf("Current user %v is following below feeds:\n", s.cfg.CurrentUserName)
 	for _, feedFollow := range feedFollows {
 		feed, err := s.db.GetFeedByID(context.Background(), feedFollow.FeedID)
@@ -52,5 +56,25 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 		}
 		fmt.Printf("%v\n", feed.Name)
 	}
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("need url as argument")
+	}
+	feedUrl := cmd.Args[0]
+
+	feed, err := s.db.GetFeedByURL(context.Background(), feedUrl)
+	if err != nil {
+		return err
+	}
+
+	err = s.db.DeleteFeedFollowByUrlForUser(context.Background(), database.DeleteFeedFollowByUrlForUserParams{UserID: user.ID, FeedID: feed.ID})
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Deleted feed.")
 	return nil
 }
