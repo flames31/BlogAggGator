@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/flames31/BlogAggGator/internal/database"
@@ -61,5 +62,26 @@ func handlerGetFeeds(s *state, cmd command, user database.User) error {
 		fmt.Println("URL : " + feed.Url)
 		fmt.Println("Created by : " + user.Name)
 	}
+	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+	limit := 2
+	if len(cmd.Args) == 1 {
+		limit, _ = strconv.Atoi(cmd.Args[0])
+	}
+
+	posts, err := s.db.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
+		UserID: user.ID,
+		Limit:  int32(limit),
+	})
+	if err != nil {
+		return err
+	}
+
+	for _, post := range posts {
+		fmt.Println(post.Title)
+	}
+
 	return nil
 }
